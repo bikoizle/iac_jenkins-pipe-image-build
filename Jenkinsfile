@@ -1,8 +1,21 @@
 def IMG_BUILD_ID;
-def COPYIMG_DIR;
 def WORKSPACE;
 
 def GIT_CREDS_ID = "70c6a9da-bbb3-45b8-8565-d34f227696d9";
+
+def GIT_COPYIMG_PBK_TAG = "0.2.1";
+def GIT_CUSTOMOS_TOML_TAG = "0.1.0";
+
+def GIT_URL_CUSTOMOS_TOML = "https://github.com/bikoizle/iac_lorax-blueprint-customos";
+def GIT_URL_COPYIMG = "https://github.com/bikoizle/iac_ansible-playbook-copyimg";
+
+def COPYIMG_PBK_DIR = "copyimg";
+def CUSTOMOS_TOML_DIR = "coreos";
+
+def CUSTOMOS_TOML = "customos.toml"; 
+def COPYIMG_PBK = "copyimg.yml";
+
+def COMPOSER_BPT = "customos";
 
 def OS_URL = "http://bender.lan:5000/v3";
 def OS_PROJECT = "admin";
@@ -16,22 +29,35 @@ node {
 
     stage("Fetch files"){
 
-     git_tag = "0.2.1"
-     COPYIMG_DIR = "copyimg"
+     echo "Fetching CustomOS blueprint file"
+
+     checkout([$class: 'GitSCM',
+            branches: [[name: "refs/tags/$GIT_CUSTOMOS_TOML_TAG"]],
+            userRemoteConfigs: [[
+                credentialsId: "$GIT_CREDS_ID",
+                url: "$GIT_URL_CUSTOMOS_TOML"]],
+            extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$CUSTOMOS_TOML_DIR"]],
+        ])
 
      echo "Fetching copyimg playbook"
 
      checkout([$class: 'GitSCM', 
-            branches: [[name: "refs/tags/$git_tag"]],
+            branches: [[name: "refs/tags/$GIT_COPYIMG_PBK_TAG"]],
             userRemoteConfigs: [[
-                credentialsId: "$GIT_CREDS_ID", 
-                url: "https://github.com/bikoizle/iac_ansible-playbook-copyimg"]],
-            extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$COPYIMG_DIR"]],
+                credentialsId: "$GIT_CREDS_ID",
+                url: "$GIT_URL_COPYIMG"]],
+            extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$COPYIMG_PBK_DIR"]],
         ])
     }
 
+    stage("Load blueprint"){
+
+     sh "composer-cli blueprints push $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
+
+    }
+
     stage("Build Image"){
-     IMG_BUILD_ID = sh(returnStdout: true, script: "composer-cli compose start test qcow2 | cut -d ' ' -f 2").trim()
+     IMG_BUILD_ID = sh(returnStdout: true, script: "composer-cli compose start $COMPOSER_BPT qcow2 | cut -d ' ' -f 2").trim()
      echo "Starting Image building"
      sh "echo 'VM id is: $IMG_BUILD_ID'"
      timeout(time: 1, unit: 'HOURS'){
@@ -51,7 +77,7 @@ node {
      withCredentials([string(credentialsId: "vault_path", variable: "vault_file")]) {
 
        ansiblePlaybook(
-           playbook: "$COPYIMG_DIR/copyimg.yml",
+           playbook: "$COPYIMG_PBK_DIR/$COPYIMG_PBK",
            vaultCredentialsId: "vault_creds",
            extraVars: [
                vault: "$vault_file",

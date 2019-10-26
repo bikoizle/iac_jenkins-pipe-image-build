@@ -126,10 +126,10 @@ node {
                project_domain: "$OS_PROJECT_DOMAIN",
                user_domain: "$OS_USER_DOMAIN",
                image_name: "$OS_IMAGE_NAME",
-               file: "$OS_FILE"
-               vm_name: "$OS_VM_NAME"
-               timeout: "$OS_VM_BUILD_TIMEOUT"
-               vm_flavour: "$OS_VM_FLAVOUR"
+               file: "$OS_FILE",
+               vm_name: "$OS_VM_NAME",
+               timeout: "$OS_VM_BUILD_TIMEOUT",
+               vm_flavour: "$OS_VM_FLAVOUR",
                vm_net: "$OS_VM_NET"
            ])
       }

@@ -4,16 +4,20 @@ def WORKSPACE;
 def GIT_CREDS_ID = "70c6a9da-bbb3-45b8-8565-d34f227696d9";
 
 def GIT_COPYIMG_PBK_TAG = "0.2.1";
+def GIT_VMBUILD_PBK_TAG = "0.1.0";
 def GIT_CUSTOMOS_TOML_TAG = "0.1.0";
 
-def GIT_URL_CUSTOMOS_TOML = "https://github.com/bikoizle/iac_lorax-blueprint-customos";
-def GIT_URL_COPYIMG = "https://github.com/bikoizle/iac_ansible-playbook-copyimg";
+def GIT_URL_CUSTOMOS_TOML = "https://github.com/bikoizle/iac_lorax-blueprint-customos.git";
+def GIT_URL_COPYIMG = "https://github.com/bikoizle/iac_ansible-playbook-copyimg.git";
+def GIT_URL_VMBUILD = "https://github.com/bikoizle/iac_ansible-playbook-vmbuild.git";
 
 def COPYIMG_PBK_DIR = "copyimg";
+def VMBUILD_PBK_DIR = "vmbuild";
 def CUSTOMOS_TOML_DIR = "coreos";
 
 def CUSTOMOS_TOML = "customos.toml"; 
 def COPYIMG_PBK = "copyimg.yml";
+def VMBUILD_PBK = "vmbuild.yml";
 
 def COMPOSER_BPT = "customos";
 
@@ -23,7 +27,10 @@ def OS_PROJECT_DOMAIN = "Default";
 def OS_USER_DOMAIN = "Default";
 def OS_IMAGE_NAME = "CustomOS";
 def OS_FILE;
-
+def OS_VM_NAME = "customos_test";
+def OS_VM_BUILD_TIMEOUT = "200";
+def OS_VM_FLAVOUR = "lab.small";
+def OS_VM_NET = "private_network";
 
 node {
 
@@ -48,6 +55,17 @@ node {
                 url: "$GIT_URL_COPYIMG"]],
             extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$COPYIMG_PBK_DIR"]],
         ])
+
+     echo "Fetching vmbuild playbook"
+
+     checkout([$class: 'GitSCM',
+            branches: [[name: "refs/tags/$GIT_VMBUILD_PBK_TAG"]],
+            userRemoteConfigs: [[
+                credentialsId: "$GIT_CREDS_ID",
+                url: "$GIT_URL_VMBUILD"]],
+            extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$VMBUILD_PBK_DIR"]],
+        ])
+
     }
 
     stage("Load blueprint"){
@@ -87,6 +105,32 @@ node {
                user_domain: "$OS_USER_DOMAIN",
                image_name: "$OS_IMAGE_NAME",
                file: "$OS_FILE"
+           ])
+      }
+
+    }
+
+    stage("Create VM"){
+
+     echo "Creating VM"
+
+     withCredentials([string(credentialsId: "vault_path", variable: "vault_file")]) {
+
+       ansiblePlaybook(
+           playbook: "$VMBUILD_PBK_DIR/$VMBUILD_PBK",
+           vaultCredentialsId: "vault_creds",
+           extraVars: [
+               vault: "$vault_file",
+               url: "$OS_URL",
+               project: "$OS_PROJECT",
+               project_domain: "$OS_PROJECT_DOMAIN",
+               user_domain: "$OS_USER_DOMAIN",
+               image_name: "$OS_IMAGE_NAME",
+               file: "$OS_FILE"
+               vm_name: "$OS_VM_NAME"
+               timeout: "$OS_VM_BUILD_TIMEOUT"
+               vm_flavour: "$OS_VM_FLAVOUR"
+               vm_net: "$OS_VM_NET"
            ])
       }
 

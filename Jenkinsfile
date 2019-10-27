@@ -13,7 +13,7 @@ def GIT_URL_VMBUILD = "https://github.com/bikoizle/iac_ansible-playbook-vmbuild.
 
 def COPYIMG_PBK_DIR = "copyimg";
 def VMBUILD_PBK_DIR = "vmbuild";
-def CUSTOMOS_TOML_DIR = "coreos";
+def CUSTOMOS_TOML_DIR = "customos";
 
 def CUSTOMOS_TOML = "customos.toml"; 
 def COPYIMG_PBK = "copyimg.yml";

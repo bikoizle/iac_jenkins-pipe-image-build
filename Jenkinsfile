@@ -74,7 +74,7 @@ node {
 
      withCredentials([string(credentialsId: "customos_pwd", variable: "customos_creds")]) {
 
-      sh "sed -i -e 's/insecure/$customos_creds/g' $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
+      sh "sed -i 's|insecure|$customos_creds|g' $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
 
      }
 

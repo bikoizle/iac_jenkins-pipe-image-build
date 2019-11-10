@@ -5,7 +5,7 @@ def GIT_CREDS_ID = "70c6a9da-bbb3-45b8-8565-d34f227696d9";
 
 def GIT_COPYIMG_PBK_TAG = "0.2.1";
 def GIT_VMBUILD_PBK_TAG = "0.1.1";
-def GIT_CUSTOMOS_TOML_TAG = "0.1.0";
+def GIT_CUSTOMOS_TOML_TAG = "0.2.0";
 
 def GIT_URL_CUSTOMOS_TOML = "https://github.com/bikoizle/iac_lorax-blueprint-customos.git";
 def GIT_URL_COPYIMG = "https://github.com/bikoizle/iac_ansible-playbook-copyimg.git";
@@ -69,6 +69,14 @@ node {
     }
 
     stage("Load blueprint"){
+
+     echo "Configuring customos user password"
+
+     withCredentials([string(credentialsId: "customos_pwd", variable: "customos_creds")]) {
+
+      sh "sed -i 's/insecure/$customos_creds/g' $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
+
+     }
 
      sh "composer-cli blueprints push $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
 

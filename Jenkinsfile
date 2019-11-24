@@ -82,7 +82,7 @@ node {
 
      withCredentials([string(credentialsId: "ssh_pub_key", variable: "key_file")]) {
 
-      $builder_key = sh(returnStdout: true, script: "cat $key_file").trim()
+      $builder_key = readFile("$key_file").trim()
       sh "sed -i 's|ROOT_KEY|$builder_key|g' $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
 
      }

@@ -78,6 +78,15 @@ node {
 
      }
 
+     echo "Injecting builder ssh public key in root user"
+
+     withCredentials([string(credentialsId: "ssh_pub_key", variable: "key_file")]) {
+
+      $builder_key = sh(returnStdout: true, script: "cat $key_file").trim()
+      sh "sed -i 's|ROOT_KEY|$builder_key|g' $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
+
+     }
+
      sh "composer-cli blueprints push $CUSTOMOS_TOML_DIR/$CUSTOMOS_TOML"
 
     }

@@ -5,7 +5,7 @@ def GIT_CREDS_ID = "70c6a9da-bbb3-45b8-8565-d34f227696d9";
 
 def GIT_COPYIMG_PBK_TAG = "0.2.1";
 def GIT_VMBUILD_PBK_TAG = "0.1.1";
-def GIT_CUSTOMOS_TOML_TAG = "0.3.0";
+def GIT_CUSTOMOS_TOML_TAG = "0.5.0";
 
 def GIT_URL_CUSTOMOS_TOML = "https://github.com/bikoizle/iac_lorax-blueprint-customos.git";
 def GIT_URL_COPYIMG = "https://github.com/bikoizle/iac_ansible-playbook-copyimg.git";

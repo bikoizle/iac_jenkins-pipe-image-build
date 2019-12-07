@@ -291,6 +291,14 @@ node {
 
       }
 
+      echo "Deleting lorax composer build"
+
+      sh "composer-cli compose delete $IMG_BUILD_ID"
+
+      echo "Deleting qcow2 file"
+
+      sh "rm -f $OS_FILE"
+
     }
 
 }

@@ -9,7 +9,7 @@ def GIT_VMBUILD_PBK_TAG = "0.1.1";
 def GIT_CUSTOMOS_TOML_TAG = "0.6.1";
 def GIT_IMGDELETE_PBK_TAG = "0.1.0";
 def GIT_VMDELETE_PBK_TAG = "0.1.0";
-def GIT_GETVMINFO_PBK_TAG = "0.1.1";
+def GIT_GETVMINFO_PBK_TAG = "0.1.2";
 
 def GIT_URL_CUSTOMOS_TOML = "https://github.com/bikoizle/iac_lorax-blueprint-customos.git";
 def GIT_URL_COPYIMG = "https://github.com/bikoizle/iac_ansible-playbook-copyimg.git";
@@ -218,9 +218,13 @@ node {
                    timeout: "$OS_VM_BUILD_TIMEOUT",
                ])
           }
+
+         echo "Loading VM info JSON file"
+
+         sh "sed -i -e 's|^\[||g' -e 's|\]$||g' $GETVMINFO_PBK_DIR/output/vminfo.json"
     
-         OS_VM_INFO = readJSON file: $GETVMINFO_PBK_DIR/output/vminfo.json
-    
+         OS_VM_INFO = readJSON file: "$GETVMINFO_PBK_DIR/output/vminfo.json"
+
         }
     
         stage("Test VM"){
@@ -242,6 +246,7 @@ node {
     }
     catch(error){
       BUILD_STATUS = 1 
+      println error.getMessage()
     }
 
     stage("Clean up"){

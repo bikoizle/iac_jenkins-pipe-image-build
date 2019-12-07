@@ -83,8 +83,6 @@ node {
                 extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$VMBUILD_PBK_DIR"]],
             ])
     
-        }
-    
          echo "Fetching imgdelete playbook"
     
          checkout([$class: 'GitSCM',
@@ -95,8 +93,6 @@ node {
                 extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$IMGDELETE_PBK_DIR"]],
             ])
     
-        }
-    
          echo "Fetching vmdelete playbook"
     
          checkout([$class: 'GitSCM',
@@ -106,8 +102,6 @@ node {
                     url: "$GIT_URL_VMDELETE"]],
                 extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$VMDELETE_PBK_DIR"]],
             ])
-    
-        }
     
          echo "Fetching getvminfo playbook"
     

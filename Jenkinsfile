@@ -108,7 +108,7 @@ node {
          checkout([$class: 'GitSCM',
                 branches: [[name: "refs/tags/$GIT_GETVMINFO_PBK_TAG"]],
                 userRemoteConfigs: [[
-                    credentialsId: "$GIT_GETVMINFO_ID",
+                    credentialsId: "$GIT_CREDS_ID",
                     url: "$GIT_URL_GETVMINFO"]],
                 extensions: [[$class: "RelativeTargetDirectory", relativeTargetDir: "$GETVMINFO_PBK_DIR"]],
             ])

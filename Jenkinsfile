@@ -235,7 +235,7 @@ node {
     
          echo "Running $CUSTOMOS_TOML_DIR tests with pytest"
     
-         sh "py.test -v --hosts="ssh://root@$OS_VM_INFO.accessIPv4" $CUSTOMOS_TOML_DIR/tests/*.py"
+         sh "py.test -v --hosts='ssh://root@$OS_VM_INFO.accessIPv4' $CUSTOMOS_TOML_DIR/tests/*.py"
     
         }
 

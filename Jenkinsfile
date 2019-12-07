@@ -221,7 +221,7 @@ node {
 
          echo "Loading VM info JSON file"
 
-         sh '''sed -i -e "s|^[||g' -e 's|]$||g" $GETVMINFO_PBK_DIR/output/vminfo.json'''
+         sh '''sed -i -e "s|^[||g' -e 's|]$||g" getvminfo/output/vminfo.json'''
     
          OS_VM_INFO = readJSON file: "$GETVMINFO_PBK_DIR/output/vminfo.json"
 

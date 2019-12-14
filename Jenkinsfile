@@ -46,6 +46,7 @@ def OS_VM_FLAVOUR = "lab.small";
 def OS_VM_NET = "private_network";
 
 def OS_VM_INFO;
+def OS_VM_IP_ADDRESS;
 
 node {
 
@@ -223,15 +224,29 @@ node {
 
          OS_VM_INFO = readJSON file: "$GETVMINFO_PBK_DIR/output/vminfo.json"
 
+         OS_VM_IP_ADDRESS = OS_VM_INFO['accessIPv4'][0]
+
         }
+
+        stage("Wait for VM"){
+
+          echo "Waiting for VM to be ready"
+
+          timeout(time: 1, unit: 'HOURS'){
+             waitUntil{
+                status = sh(returnStatus: true, script: "ping -c 9 $OS_VM_IP_ADDRESS")
+                return status == 0
+             }
+         }
+
+        }
+
     
         stage("Test VM"){
     
          echo "Removing old VM IP address ssh fingerprint"
     
-         vm_ip_address = OS_VM_INFO['accessIPv4'][0]
-
-         sh "ssh-keygen -R $vm_ip_address"
+         sh "ssh-keygen -R $OS_VM_IP_ADDRESS"
     
          echo "Running flake8 in $CUSTOMOS_TOML_DIR tests"
     
@@ -239,7 +254,7 @@ node {
     
          echo "Running $CUSTOMOS_TOML_DIR tests with pytest"
     
-         sh "py.test -v --hosts='ssh://root@$vm_ip_address' $CUSTOMOS_TOML_DIR/tests/*.py"
+         sh "py.test -v --hosts='ssh://root@$OS_VM_IP_ADDRESS' $CUSTOMOS_TOML_DIR/tests/*.py"
     
         }
 

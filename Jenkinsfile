@@ -6,7 +6,7 @@ def GIT_CREDS_ID = "70c6a9da-bbb3-45b8-8565-d34f227696d9";
 
 def GIT_COPYIMG_PBK_TAG = "0.2.1";
 def GIT_VMBUILD_PBK_TAG = "0.1.1";
-def GIT_CUSTOMOS_TOML_TAG = "0.6.3";
+def GIT_CUSTOMOS_TOML_TAG = "0.6.7";
 def GIT_IMGDELETE_PBK_TAG = "0.1.0";
 def GIT_VMDELETE_PBK_TAG = "0.1.0";
 def GIT_GETVMINFO_PBK_TAG = "0.1.3";
@@ -46,6 +46,7 @@ def OS_VM_FLAVOUR = "lab.small";
 def OS_VM_NET = "private_network";
 
 def OS_VM_INFO;
+def OS_VM_IP_ADDRESS;
 
 node {
 
@@ -223,15 +224,29 @@ node {
 
          OS_VM_INFO = readJSON file: "$GETVMINFO_PBK_DIR/output/vminfo.json"
 
+         OS_VM_IP_ADDRESS = OS_VM_INFO['accessIPv4'][0]
+
         }
+
+        stage("Wait for VM"){
+
+          echo "Waiting for VM to be ready"
+
+          timeout(time: 1, unit: 'HOURS'){
+             waitUntil{
+                status = sh(returnStatus: true, script: "ansible -i '$OS_VM_IP_ADDRESS,' all -m ping")
+                return status == 0
+             }
+         }
+
+        }
+
     
         stage("Test VM"){
     
          echo "Removing old VM IP address ssh fingerprint"
     
-         vm_ip_address = OS_VM_INFO['accessIPv4'][0]
-
-         sh "ssh-keygen -R $vm_ip_address"
+         sh "ssh-keygen -R $OS_VM_IP_ADDRESS"
     
          echo "Running flake8 in $CUSTOMOS_TOML_DIR tests"
     
@@ -239,7 +254,7 @@ node {
     
          echo "Running $CUSTOMOS_TOML_DIR tests with pytest"
     
-         sh "py.test -v --hosts='ssh://root@$vm_ip_address' $CUSTOMOS_TOML_DIR/tests/*.py"
+         sh "py.test -v --hosts='ssh://root@$OS_VM_IP_ADDRESS' $CUSTOMOS_TOML_DIR/tests/*.py"
     
         }
 
